@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Estímuls · Cites</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Estímuls Cites">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #1a1a2e; --bg2: #222236; --bg3: #2a2a42; --bg4: #32324e;
+    --card: #252538; --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+    --text: #f0f0f8; --text2: #9999bb; --text3: #666688;
+    --purple: #7c6fff; --purple-glow: rgba(124,111,255,0.18);
+    --teal: #2ecba1; --teal-glow: rgba(46,203,161,0.15);
+    --amber: #f5a623; --amber-glow: rgba(245,166,35,0.15);
+    --coral: #ff6b6b; --coral-glow: rgba(255,107,107,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden; }
+  .app { width: 100%; max-width: 430px; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+
+  /* AUTH SCREEN */
+  .auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; }
+  .auth-logo { width: 64px; height: 64px; border-radius: 50%; background: var(--purple-glow); border: 2px solid var(--purple); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; color: var(--purple); margin-bottom: 16px; }
+  .auth-title { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .auth-sub { font-size: 13px; color: var(--text2); margin-bottom: 40px; }
+  .auth-form { width: 100%; max-width: 340px; }
+  .field { margin-bottom: 14px; }
+  .field label { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 13px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; color: var(--text); font-size: 15px; outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--purple); }
+  .btn-auth { width: 100%; padding: 14px; background: var(--purple); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
+  .btn-auth:active { opacity: 0.85; }
+  .auth-error { background: var(--coral-glow); border: 1px solid var(--coral); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--coral); margin-top: 12px; display: none; }
+  .auth-switch { font-size: 13px; color: var(--text2); margin-top: 20px; text-align: center; }
+  .auth-switch span { color: var(--purple); cursor: pointer; font-weight: 600; }
+
+  /* HEADER */
+  .header { background: var(--bg2); padding: env(safe-area-inset-top, 44px) 20px 18px; border-bottom: 1px solid var(--border2); }
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
+  .logo-row { display: flex; align-items: center; gap: 10px; }
+  .logo-e { width: 34px; height: 34px; border-radius: 50%; background: var(--purple-glow); border: 1.5px solid var(--purple); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--purple); }
+  .logo-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .logo-sub2 { font-size: 10px; color: var(--text2); letter-spacing: 0.05em; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--purple-glow); border: 1.5px solid var(--purple); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--purple); cursor: pointer; }
+  .header-greeting { font-size: 11px; color: var(--text2); margin-top: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .header-name { font-size: 21px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 90px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* SECTION TITLE */
+  .stitle { font-size: 10px; font-weight: 700; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .stitle::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid var(--border2); }
+
+  /* NEXT APPT */
+  .next-card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border2); position: relative; overflow: hidden; }
+  .next-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--purple), var(--teal)); }
+  .next-eyebrow { font-size: 10px; font-weight: 700; color: var(--purple); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .next-service { font-size: 19px; font-weight: 700; color: var(--text); }
+  .next-meta { font-size: 12px; color: var(--text2); margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+  .countdown-pill { display: inline-flex; align-items: center; gap: 5px; background: var(--purple-glow); color: var(--purple); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; margin-top: 10px; border: 1px solid rgba(124,111,255,0.3); }
+  .countdown-pill.red { background: var(--coral-glow); color: var(--coral); border-color: rgba(255,107,107,0.3); }
+  .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn { flex: 1; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: opacity 0.15s; }
+  .btn:active { opacity: 0.8; }
+  .btn-sec { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2) !important; }
+  .btn-pri { background: var(--purple); color: white; }
+  .btn-danger { background: var(--coral); color: white; }
+
+  /* ALERT */
+  .alert-card { background: var(--teal-glow); border: 1px solid var(--teal); border-radius: 14px; padding: 14px; margin-bottom: 16px; display: flex; gap: 10px; }
+  .alert-card i { color: var(--teal); font-size: 20px; margin-top: 1px; flex-shrink: 0; }
+  .alert-title { font-size: 13px; font-weight: 700; color: var(--teal); }
+  .alert-sub { font-size: 12px; color: rgba(46,203,161,0.75); margin-top: 3px; line-height: 1.5; }
+  .alert-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .abtn { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; border: none; }
+  .abtn-yes { background: var(--teal); color: #0a2e25; }
+  .abtn-no { background: transparent; color: var(--teal); border: 1px solid var(--teal) !important; }
+
+  /* APPT LIST */
+  .appt-item { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .appt-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .appt-date { font-size: 13px; font-weight: 600; color: var(--text); }
+  .appt-detail { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .badge-purple { background: var(--purple-glow); color: var(--purple); border: 1px solid rgba(124,111,255,0.3); }
+  .badge-coral { background: var(--coral-glow); color: var(--coral); border: 1px solid rgba(255,107,107,0.3); }
+  .badge-teal { background: var(--teal-glow); color: var(--teal); border: 1px solid rgba(46,203,161,0.3); }
+
+  /* BOOKING */
+  .pro-item { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; border: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .pro-item.selected { border-color: var(--purple); background: var(--purple-glow); }
+  .pro-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .pro-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .pro-spec { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+  .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .week-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .wbtn { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; color: var(--text2); font-size: 18px; padding: 5px 9px; line-height: 1; }
+
+  .days-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 14px; }
+  .day-col { text-align: center; cursor: pointer; }
+  .day-name { font-size: 9px; color: var(--text3); font-weight: 600; margin-bottom: 3px; letter-spacing: 0.04em; }
+  .day-num { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 13px; font-weight: 600; color: var(--text2); }
+  .day-num.today { background: var(--purple); color: white; }
+  .day-num.selected { background: var(--purple-glow); color: var(--purple); border: 1px solid var(--purple); }
+  .day-num.past { opacity: 0.3; cursor: default; }
+
+  .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 16px; }
+  .slot { padding: 11px 4px; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .slot.free { background: var(--teal-glow); color: var(--teal); border-color: rgba(46,203,161,0.35); }
+  .slot.busy { background: var(--bg3); color: var(--text3); cursor: default; font-weight: 400; }
+  .slot.selected { background: var(--purple); color: white; border-color: var(--purple); }
+  .slot.mine { background: var(--purple-glow); color: var(--purple); border-color: var(--purple); cursor: default; }
+  .slot.mine::after { content: ' ✓'; }
+
+  .legend { display: flex; gap: 12px; font-size: 10px; color: var(--text2); margin-bottom: 16px; flex-wrap: wrap; }
+  .ldot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  .confirm-btn { width: 100%; padding: 14px; background: var(--purple); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+  .confirm-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* AVISOS */
+  .toggle-item { background: var(--card); border-radius: 12px; padding: 13px 14px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tlabel { font-size: 13px; font-weight: 600; color: var(--text); }
+  .tsub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .tswitch { width: 44px; height: 26px; border-radius: 13px; background: var(--purple); position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .tswitch.off { background: var(--bg4); }
+  .tswitch::after { content: ''; width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 3px; right: 3px; transition: all 0.2s; }
+  .tswitch.off::after { right: auto; left: 3px; }
+
+  .notif-item { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; gap: 10px; }
+  .nicon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+  .ntitle { font-size: 13px; font-weight: 600; color: var(--text); }
+  .nbody { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.5; }
+  .ntime { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+  /* PERFIL */
+  .profile-hero { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center; border: 1px solid var(--border2); }
+  .profile-av { width: 64px; height: 64px; border-radius: 50%; background: var(--purple-glow); border: 2px solid var(--purple); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--purple); margin: 0 auto 10px; }
+  .profile-nm { font-size: 18px; font-weight: 700; color: var(--text); }
+  .profile-em { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .info-row { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 6px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .info-row i { font-size: 18px; color: var(--purple); }
+  .ilabel { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .ival { font-size: 13px; font-weight: 600; color: var(--text); margin-top: 1px; }
+  .policy-card { background: var(--amber-glow); border-radius: 12px; padding: 14px; border: 1px solid rgba(245,166,35,0.35); margin-top: 6px; }
+  .ptitle { font-size: 12px; font-weight: 700; color: var(--amber); margin-bottom: 5px; }
+  .pbody { font-size: 12px; color: rgba(245,166,35,0.85); line-height: 1.6; }
+  .logout-btn { width: 100%; padding: 13px; background: var(--coral-glow); color: var(--coral); border: 1px solid rgba(255,107,107,0.35); border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+
+  /* NAV */
+  .nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 1px solid var(--border2); display: flex; justify-content: space-around; padding: 8px 0; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 100; }
+  .nitem { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text2); font-size: 10px; font-weight: 600; cursor: pointer; padding: 4px 12px; transition: color 0.15s; letter-spacing: 0.04em; text-transform: uppercase; }
+  .nitem.active { color: var(--purple); }
+  .nitem i { font-size: 22px; }
+  .nbadge { position: absolute; top: -2px; right: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .nitem-wrap { position: relative; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; padding: 24px 20px; width: 100%; max-width: 430px; border-top: 1px solid var(--border2); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .mhandle { width: 40px; height: 4px; background: var(--bg4); border-radius: 2px; margin: 0 auto 20px; }
+  .mtitle { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .mbody { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+  .mwarn { background: var(--amber-glow); border-radius: 10px; padding: 10px 12px; margin-bottom: 20px; display: flex; gap: 8px; border: 1px solid rgba(245,166,35,0.35); }
+  .mwarn i { color: var(--amber); font-size: 16px; margin-top: 1px; }
+  .mwarn span { font-size: 12px; color: rgba(245,166,35,0.9); line-height: 1.5; }
+
+  /* LOADING */
+  .loading { display: flex; align-items: center; justify-content: center; min-height: 200px; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 13px; }
+  .empty i { font-size: 36px; color: var(--text3); display: block; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- AUTH -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-logo">e</div>
+    <div class="auth-title">estímuls</div>
+    <div class="auth-sub">Centre de Psicologia i Aprenentatge</div>
+    <div class="auth-form">
+      <div class="field"><label>Correu electrònic</label><input type="email" id="authEmail" placeholder="nom@email.com" autocomplete="email"></div>
+      <div class="field"><label>Contrasenya</label><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn-auth" onclick="doLogin()">Entrar</button>
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-switch">No tens compte? <span onclick="toggleRegister()">Registra't</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" style="display:none; flex-direction:column; flex:1">
+    <div class="header">
+      <div class="header-top">
+        <div class="logo-row">
+          <div class="logo-e">e</div>
+          <div><div class="logo-name">estímuls</div><div class="logo-sub2">CENTRE DE PSICOLOGIA</div></div>
+        </div>
+        <div class="avatar-btn" id="avatarBtn" onclick="goTo('profile')">?</div>
+      </div>
+      <div class="header-greeting" id="hGreeting">Benvingut/da</div>
+      <div class="header-name" id="hName">Carregant...</div>
+    </div>
+
+    <div class="content">
+      <!-- HOME -->
+      <div class="screen active" id="screen-home">
+        <div id="slotAlertContainer"></div>
+        <div class="stitle">Propera cita</div>
+        <div id="nextApptContainer"><div class="loading"><div class="spinner"></div></div></div>
+        <div class="stitle">Properes sessions</div>
+        <div id="upcomingContainer"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- BOOKING -->
+      <div class="screen" id="screen-booking">
+        <div class="stitle">Professional</div>
+        <div id="proList"><div class="loading"><div class="spinner"></div></div></div>
+        <div id="calendarSection" style="display:none">
+          <div class="stitle">Tria dia</div>
+          <div class="week-nav">
+            <button class="wbtn" onclick="changeWeek(-1)"><i class="ti ti-chevron-left"></i></button>
+            <span class="week-label" id="weekLabel"></span>
+            <button class="wbtn" onclick="changeWeek(1)"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div class="days-row" id="daysRow"></div>
+          <div class="stitle" id="slotsTitle">Hores disponibles</div>
+          <div class="slots-grid" id="slotsGrid"></div>
+          <div class="legend">
+            <span style="display:flex;align-items:center;gap:4px"><span class="ldot" style="background:var(--teal-glow);border:1px solid var(--teal)"></span>Lliure</span>
+            <span style="display:flex;align-items:center;gap:4px"><span class="ldot" style="background:var(--purple)"></span>Seleccionada</span>
+            <span style="display:flex;align-items:center;gap:4px;opacity:0.5"><span class="ldot" style="background:var(--bg3)"></span>Ocupada</span>
+          </div>
+          <button class="confirm-btn" id="confirmBtn" disabled onclick="confirmBooking()">Selecciona una hora</button>
+        </div>
+      </div>
+
+      <!-- AVISOS -->
+      <div class="screen" id="screen-alerts">
+        <div class="stitle">Nous avisos</div>
+        <div id="alertsList"></div>
+        <div class="stitle" style="margin-top:16px">Configuració d'avisos</div>
+        <div class="toggle-item">
+          <div><div class="tlabel">Hores lliures</div><div class="tsub">Avisa'm quan quedi un forat amb la meva professional</div></div>
+          <div class="tswitch" id="tg-slots" onclick="toggleNotif('slots', this)"></div>
+        </div>
+        <div class="toggle-item">
+          <div><div class="tlabel">Recordatori 24h</div><div class="tsub">El dia abans de cada sessió</div></div>
+          <div class="tswitch" id="tg-24h" onclick="toggleNotif('24h', this)"></div>
+        </div>
+        <div class="toggle-item">
+          <div><div class="tlabel">Recordatori 2h</div><div class="tsub">Dues hores abans de la sessió</div></div>
+          <div class="tswitch off" id="tg-2h" onclick="toggleNotif('2h', this)"></div>
+        </div>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="screen" id="screen-profile">
+        <div class="profile-hero">
+          <div class="profile-av" id="profAv">?</div>
+          <div class="profile-nm" id="profNm">Carregant...</div>
+          <div class="profile-em" id="profEm"></div>
+        </div>
+        <div class="stitle">Les meves dades</div>
+        <div class="info-row"><i class="ti ti-phone"></i><div><div class="ilabel">Telèfon</div><div class="ival" id="profTel">—</div></div></div>
+        <div class="info-row"><i class="ti ti-user"></i><div><div class="ilabel">Professional assignada</div><div class="ival" id="profPro">—</div></div></div>
+        <div class="info-row"><i class="ti ti-clipboard-list"></i><div><div class="ilabel">Servei</div><div class="ival" id="profServ">—</div></div></div>
+        <div class="info-row"><i class="ti ti-calendar-stats"></i><div><div class="ilabel">Sessions aquest mes</div><div class="ival" id="profStats">—</div></div></div>
+        <div class="stitle" style="margin-top:16px">Política de cancel·lació</div>
+        <div class="policy-card">
+          <div class="ptitle"><i class="ti ti-alert-triangle" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Cancel·lació amb menys de 24h</div>
+          <div class="pbody">Si no cancel·les la cita amb almenys 24 hores d'antelació, la sessió es factura igualment. Pots fer-ho des de l'app en qualsevol moment.</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout" style="font-size:15px;vertical-align:-2px;margin-right:6px"></i>Tancar sessió</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nitem active" onclick="goTo('home')" id="nav-home"><i class="ti ti-home"></i>Inici</div>
+      <div class="nitem" onclick="goTo('booking')" id="nav-booking"><i class="ti ti-calendar-plus"></i>Reservar</div>
+      <div class="nitem" onclick="goTo('alerts')" id="nav-alerts">
+        <div class="nitem-wrap"><i class="ti ti-bell"></i><span class="nbadge" id="alertBadge" style="display:none"></span></div>Avisos
+      </div>
+      <div class="nitem" onclick="goTo('profile')" id="nav-profile"><i class="ti ti-user"></i>Perfil</div>
+    </nav>
+  </div>
+
+  <!-- CANCEL MODAL -->
+  <div class="modal-overlay" id="cancelModal">
+    <div class="modal-sheet">
+      <div class="mhandle"></div>
+      <div class="mtitle">Anul·lar cita</div>
+      <div class="mbody" id="cancelModalBody"></div>
+      <div class="mwarn" id="cancelWarn" style="display:none">
+        <i class="ti ti-alert-triangle"></i>
+        <span>Com que la sessió és en menys de 24 hores, aquesta cancel·lació <strong>es facturarà igualment</strong> segons la política del centre.</span>
+      </div>
+      <button class="btn btn-danger" style="width:100%;margin-bottom:8px" onclick="confirmCancel()">Sí, anul·lo la cita</button>
+      <button class="btn btn-sec" style="width:100%" onclick="closeCancelModal()">Mantenir la cita</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDeIf538cUkl78iBmem_CQHLOakCYTvmcc",
+  authDomain: "cites-estimuls.firebaseapp.com",
+  projectId: "cites-estimuls",
+  storageBucket: "cites-estimuls.firebasestorage.app",
+  messagingSenderId: "408370307765",
+  appId: "1:408370307765:web:fdb8b2c9eb61fa3749d4fc",
+  measurementId: "G-5NBZYD0GEH"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
+// --- STATE ---
+let currentUser = null;
+let userData = null;
+let professionals = [];
+let selectedPro = null;
+let selectedDate = null;
+let selectedSlot = null;
+let currentWeekStart = null;
+let cancelCiteId = null;
+let cancelCiteData = null;
+let isRegisterMode = false;
+
+// --- DAYS ---
+const DAYS_CA = ['Dg','Dl','Dt','Dc','Dj','Dv','Ds'];
+const MONTHS_CA = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+
+function formatDate(d) {
+  const days = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
+  return `${days[d.getDay()]} ${d.getDate()} ${MONTHS_CA[d.getMonth()]}`;
+}
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function parseKey(k) {
+  const [y,m,d2] = k.split('-').map(Number);
+  return new Date(y, m-1, d2);
+}
+function hoursUntil(dateStr, timeStr) {
+  const [h,mn] = timeStr.split(':').map(Number);
+  const dt = parseKey(dateStr);
+  dt.setHours(h, mn, 0, 0);
+  return (dt - new Date()) / 3600000;
+}
+function initWeek() {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  currentWeekStart = new Date(now);
+  currentWeekStart.setDate(now.getDate() + diff);
+  currentWeekStart.setHours(0,0,0,0);
+}
+
+// --- AUTH ---
+window.toggleRegister = function() {
+  isRegisterMode = !isRegisterMode;
+  const sw = document.querySelector('.auth-switch');
+  const btn = document.querySelector('.btn-auth');
+  if (isRegisterMode) {
+    btn.textContent = 'Crear compte';
+    sw.innerHTML = 'Ja tens compte? <span onclick="toggleRegister()">Inicia sessió</span>';
+  } else {
+    btn.textContent = 'Entrar';
+    sw.innerHTML = 'No tens compte? <span onclick="toggleRegister()">Registra\'t</span>';
+  }
+};
+
+window.doLogin = async function() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pw = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  errEl.style.display = 'none';
+  try {
+    if (isRegisterMode) {
+      await createUserWithEmailAndPassword(auth, email, pw);
+    } else {
+      await signInWithEmailAndPassword(auth, email, pw);
+    }
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found': 'No existeix cap compte amb aquest correu.',
+      'auth/wrong-password': 'Contrasenya incorrecta.',
+      'auth/invalid-email': 'El format del correu no és vàlid.',
+      'auth/email-already-in-use': 'Aquest correu ja està registrat.',
+      'auth/weak-password': 'La contrasenya ha de tenir almenys 6 caràcters.',
+      'auth/invalid-credential': 'Correu o contrasenya incorrectes.'
+    };
+    errEl.textContent = msgs[e.code] || 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+};
+
+window.doLogout = async function() {
+  await signOut(auth);
+};
+
+// --- AUTH STATE ---
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    await loadUserData();
+    await loadProfessionals();
+    loadHome();
+    renderProList();
+    initWeek();
+    renderCalendar();
+  } else {
+    currentUser = null;
+    userData = null;
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+  }
+});
+
+// --- LOAD DATA ---
+async function loadUserData() {
+  try {
+    const snap = await getDoc(doc(db, 'usuaris', currentUser.uid));
+    if (snap.exists()) {
+      userData = snap.data();
+    } else {
+      userData = { nom: currentUser.email.split('@')[0], email: currentUser.email, servei: '', professional_id: '', telefon: '', avisos: { slots: true, h24: true, h2: false } };
+      await updateDoc(doc(db, 'usuaris', currentUser.uid), userData).catch(() =>
+        addDoc(collection(db, 'usuaris'), { uid: currentUser.uid, ...userData })
+      );
+    }
+    const initials = userData.nom ? userData.nom.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?';
+    document.getElementById('avatarBtn').textContent = initials;
+    document.getElementById('hGreeting').textContent = greeting();
+    document.getElementById('hName').textContent = userData.nom || currentUser.email;
+    document.getElementById('profAv').textContent = initials;
+    document.getElementById('profNm').textContent = userData.nom || '—';
+    document.getElementById('profEm').textContent = currentUser.email;
+    document.getElementById('profTel').textContent = userData.telefon || '—';
+    document.getElementById('profServ').textContent = userData.servei || '—';
+    const av = userData.avisos || {};
+    if (!av.slots) document.getElementById('tg-slots').classList.add('off');
+    if (!av.h24) document.getElementById('tg-24h').classList.add('off');
+    if (av.h2) document.getElementById('tg-2h').classList.remove('off');
+  } catch(e) { console.error('loadUserData', e); }
+}
+
+async function loadProfessionals() {
+  try {
+    const snap = await getDocs(collection(db, 'professionals'));
+    professionals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (professionals.length === 0) {
+      await seedProfessionals();
+      const snap2 = await getDocs(collection(db, 'professionals'));
+      professionals = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    if (userData && userData.professional_id) {
+      const pro = professionals.find(p => p.id === userData.professional_id);
+      document.getElementById('profPro').textContent = pro ? pro.nom : '—';
+    }
+  } catch(e) { console.error('loadProfessionals', e); }
+}
+
+async function seedProfessionals() {
+  const pros = [
+    { nom: 'Marta Ferrer', especialitat: 'Reeducació del Llenguatge', color: '#7c6fff', horari_inici: '15:00', horari_fi: '20:00', durada_min: 30 },
+    { nom: 'Joan Mas', especialitat: 'Psicologia Clínica', color: '#2ecba1', horari_inici: '09:00', horari_fi: '18:00', durada_min: 60 },
+    { nom: 'Anna Riera', especialitat: 'Reeducació Pedagògica', color: '#f5a623', horari_inici: '15:00', horari_fi: '20:00', durada_min: 45 },
+    { nom: 'Laura Pons', especialitat: 'Reforç Escolar', color: '#ff6b6b', horari_inici: '15:00', horari_fi: '20:00', durada_min: 60 },
+  ];
+  for (const p of pros) await addDoc(collection(db, 'professionals'), p);
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bon dia';
+  if (h < 19) return 'Bona tarda';
+  return 'Bona nit';
+}
+
+// --- HOME ---
+async function loadHome() {
+  try {
+    const now = new Date();
+    const q = query(
+      collection(db, 'cites'),
+      where('usuari_uid', '==', currentUser.uid),
+      where('estat', '==', 'confirmada'),
+      orderBy('data', 'asc')
+    );
+    const snap = await getDocs(q);
+    const cites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const futures = cites.filter(c => {
+      const dt = parseKey(c.data);
+      dt.setHours(...c.hora.split(':').map(Number), 0, 0);
+      return dt > now;
+    });
+
+    // NEXT
+    const nc = document.getElementById('nextApptContainer');
+    if (futures.length === 0) {
+      nc.innerHTML = `<div class="empty"><i class="ti ti-calendar-off"></i>No tens cap cita propera.<br><span style="color:var(--purple);cursor:pointer" onclick="goTo('booking')">Reserva la primera</span></div>`;
+    } else {
+      const c = futures[0];
+      const hrs = hoursUntil(c.data, c.hora);
+      const canCancel = hrs > 24;
+      const pro = professionals.find(p => p.id === c.professional_id);
+      nc.innerHTML = `
+        <div class="next-card">
+          <div class="next-eyebrow">${pro ? pro.especialitat : 'Sessió'}</div>
+          <div class="next-service">${formatDate(parseKey(c.data))} · ${c.hora} h</div>
+          <div class="next-meta"><i class="ti ti-user" style="font-size:13px"></i> ${pro ? pro.nom : '—'} &nbsp;·&nbsp; ${c.durada_min || 30} min</div>
+          <div class="countdown-pill ${canCancel ? '' : 'red'}">
+            <i class="ti ti-clock" style="font-size:13px"></i>
+            ${canCancel ? `Pots cancel·lar fins ${formatDate(new Date(parseKey(c.data).getTime() - 86400000))} a les ${c.hora} h` : 'Menys de 24h: es facturarà si cancel·les'}
+          </div>
+          <div class="actions">
+            <button class="btn btn-sec" onclick="openCancelModal('${c.id}', '${c.data}', '${c.hora}', ${hrs < 24})">Anul·lar</button>
+            <button class="btn btn-pri" onclick="goTo('booking')">Canviar hora</button>
+          </div>
+        </div>`;
+    }
+
+    // UPCOMING
+    const uc = document.getElementById('upcomingContainer');
+    const rest = futures.slice(1, 5);
+    if (rest.length === 0) {
+      uc.innerHTML = `<div class="empty" style="padding:20px"><i class="ti ti-calendar-event"></i>Sense sessions addicionals</div>`;
+    } else {
+      uc.innerHTML = rest.map(c => {
+        const pro = professionals.find(p => p.id === c.professional_id);
+        return `<div class="appt-item">
+          <div class="appt-dot" style="background:${pro ? pro.color : 'var(--purple)'}"></div>
+          <div style="flex:1">
+            <div class="appt-date">${formatDate(parseKey(c.data))} · ${c.hora} h</div>
+            <div class="appt-detail">${pro ? pro.especialitat : ''} · ${pro ? pro.nom : ''}</div>
+          </div>
+          <span class="badge badge-purple">Confirmada</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Stats
+    const thisMonth = cites.filter(c => parseKey(c.data).getMonth() === now.getMonth());
+    document.getElementById('profStats').textContent = `${thisMonth.length} sessions · ${futures.length} pendents`;
+
+    // Slot alerts
+    loadSlotAlerts();
+  } catch(e) { console.error('loadHome', e); }
+}
+
+async function loadSlotAlerts() {
+  try {
+    const today = dateKey(new Date());
+    const q = query(collection(db, 'slots_disponibles'), where('data', '>=', today), orderBy('data', 'asc'));
+    const snap = await getDocs(q);
+    const slots = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const container = document.getElementById('slotAlertContainer');
+    if (slots.length === 0) { container.innerHTML = ''; return; }
+    const s = slots[0];
+    const pro = professionals.find(p => p.id === s.professional_id);
+    container.innerHTML = `<div class="alert-card">
+      <i class="ti ti-bell-ringing"></i>
+      <div>
+        <div class="alert-title">Hora lliure disponible!</div>
+        <div class="alert-sub">${pro ? pro.nom : 'Professional'} té un forat el ${formatDate(parseKey(s.data))} a les ${s.hora} h.</div>
+        <div class="alert-actions">
+          <button class="abtn abtn-yes" onclick="bookSlot('${s.id}', '${s.professional_id}', '${s.data}', '${s.hora}')">Sí, la vull</button>
+          <button class="abtn abtn-no" onclick="dismissSlot('${s.id}')">No, gràcies</button>
+        </div>
+      </div>
+    </div>`;
+    document.getElementById('alertBadge').style.display = 'block';
+  } catch(e) { console.error('loadSlotAlerts', e); }
+}
+
+window.bookSlot = async function(slotId, proId, data, hora) {
+  const pro = professionals.find(p => p.id === proId);
+  try {
+    await addDoc(collection(db, 'cites'), {
+      usuari_uid: currentUser.uid,
+      professional_id: proId,
+      data, hora,
+      durada_min: pro ? pro.durada_min : 30,
+      estat: 'confirmada',
+      pagada: false,
+      cancel_lada_24h: false,
+      creat_a: serverTimestamp()
+    });
+    await deleteDoc(doc(db, 'slots_disponibles', slotId));
+    document.getElementById('slotAlertContainer').innerHTML = '';
+    loadHome();
+  } catch(e) { alert('Error en reservar: ' + e.message); }
+};
+
+window.dismissSlot = function(id) {
+  document.getElementById('slotAlertContainer').innerHTML = '';
+};
+
+// --- BOOKING ---
+function renderProList() {
+  const container = document.getElementById('proList');
+  if (professionals.length === 0) { container.innerHTML = '<div class="loading"><div class="spinner"></div></div>'; return; }
+  container.innerHTML = professionals.map((p, i) => `
+    <div class="pro-item ${i === 0 ? 'selected' : ''}" onclick="selectPro('${p.id}', this)">
+      <div class="pro-circle" style="background:${p.color}22; color:${p.color}; border:1.5px solid ${p.color}">
+        ${p.nom.split(' ').map(w=>w[0]).join('').slice(0,2)}
+      </div>
+      <div><div class="pro-name">${p.nom}</div><div class="pro-spec">${p.especialitat}</div></div>
+      ${i === 0 ? '<i class="ti ti-circle-check" style="margin-left:auto;color:var(--purple);font-size:18px"></i>' : ''}
+    </div>`).join('');
+  if (professionals.length > 0) {
+    selectedPro = professionals[0];
+    document.getElementById('calendarSection').style.display = 'block';
+    renderCalendar();
+  }
+}
+
+window.selectPro = function(id, el) {
+  document.querySelectorAll('.pro-item').forEach(p => {
+    p.classList.remove('selected');
+    const ic = p.querySelector('.ti-circle-check');
+    if (ic) ic.remove();
+  });
+  el.classList.add('selected');
+  const ic = document.createElement('i');
+  ic.className = 'ti ti-circle-check';
+  ic.style.cssText = 'margin-left:auto;color:var(--purple);font-size:18px';
+  el.appendChild(ic);
+  selectedPro = professionals.find(p => p.id === id);
+  selectedSlot = null;
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').textContent = 'Selecciona una hora';
+  renderCalendar();
+};
+
+function renderCalendar() {
+  if (!currentWeekStart) return;
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(currentWeekStart);
+    d.setDate(currentWeekStart.getDate() + i);
+    days.push(d);
+  }
+  const today = dateKey(new Date());
+  const start = `${days[0].getDate()} ${MONTHS_CA[days[0].getMonth()]}`;
+  const end = `${days[6].getDate()} ${MONTHS_CA[days[6].getMonth()]}`;
+  document.getElementById('weekLabel').textContent = `${start} – ${end}`;
+
+  const row = document.getElementById('daysRow');
+  row.innerHTML = days.map(d => {
+    const k = dateKey(d);
+    const isPast = k < today;
+    const isTod = k === today;
+    const isSel = k === (selectedDate ? dateKey(selectedDate) : null);
+    return `<div class="day-col" onclick="${isPast ? '' : `selectDay('${k}', this)`}">
+      <div class="day-name">${DAYS_CA[d.getDay()]}</div>
+      <div class="day-num ${isTod ? 'today' : ''} ${isSel && !isTod ? 'selected' : ''} ${isPast ? 'past' : ''}">${d.getDate()}</div>
+    </div>`;
+  }).join('');
+
+  if (!selectedDate) {
+    const todayD = days.find(d => dateKey(d) === today);
+    if (todayD) { selectedDate = todayD; renderSlots(); }
+    else { selectedDate = days[0]; renderSlots(); }
+  } else { renderSlots(); }
+}
+
+window.selectDay = function(k, el) {
+  selectedDate = parseKey(k);
+  selectedSlot = null;
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').textContent = 'Selecciona una hora';
+  document.querySelectorAll('.day-num').forEach(d => d.classList.remove('selected'));
+  el.querySelector('.day-num').classList.add('selected');
+  renderSlots();
+};
+
+window.changeWeek = function(dir) {
+  currentWeekStart.setDate(currentWeekStart.getDate() + dir * 7);
+  selectedDate = null;
+  selectedSlot = null;
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').textContent = 'Selecciona una hora';
+  renderCalendar();
+};
+
+async function renderSlots() {
+  if (!selectedPro || !selectedDate) return;
+  const k = dateKey(selectedDate);
+  document.getElementById('slotsTitle').textContent = `Hores disponibles — ${formatDate(selectedDate)}`;
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:16px"><div class="spinner" style="margin:0 auto"></div></div>';
+
+  try {
+    const slots = generateSlots(selectedPro);
+    const q = query(collection(db, 'cites'), where('professional_id', '==', selectedPro.id), where('data', '==', k), where('estat', '==', 'confirmada'));
+    const snap = await getDocs(q);
+    const booked = snap.docs.map(d => d.data().hora);
+    const myQ = query(collection(db, 'cites'), where('usuari_uid', '==', currentUser.uid), where('data', '==', k), where('estat', '==', 'confirmada'));
+    const mySnap = await getDocs(myQ);
+    const mine = mySnap.docs.map(d => d.data().hora);
+
+    if (slots.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text2);font-size:13px;padding:16px">Sense horari configurat per a aquest professional</div>'; return; }
+
+    grid.innerHTML = slots.map(s => {
+      const isMine = mine.includes(s);
+      const isBusy = booked.includes(s) && !isMine;
+      const isSel = s === selectedSlot;
+      let cls = 'free';
+      if (isMine) cls = 'mine';
+      else if (isBusy) cls = 'busy';
+      else if (isSel) cls = 'selected';
+      const click = (!isBusy && !isMine) ? `onclick="selectSlot('${s}', this)"` : '';
+      return `<div class="slot ${cls}" ${click}>${s}</div>`;
+    }).join('');
+  } catch(e) { grid.innerHTML = `<div style="grid-column:1/-1;color:var(--coral);font-size:12px;padding:16px">Error carregant horaris: ${e.message}</div>`; }
+}
+
+function generateSlots(pro) {
+  if (!pro.horari_inici || !pro.horari_fi) return [];
+  const slots = [];
+  const [sh, sm] = pro.horari_inici.split(':').map(Number);
+  const [eh, em] = pro.horari_fi.split(':').map(Number);
+  const dur = pro.durada_min || 30;
+  let cur = sh * 60 + sm;
+  const end2 = eh * 60 + em;
+  while (cur + dur <= end2) {
+    slots.push(`${String(Math.floor(cur/60)).padStart(2,'0')}:${String(cur%60).padStart(2,'0')}`);
+    cur += dur;
+  }
+  return slots;
+}
+
+window.selectSlot = function(hora, el) {
+  document.querySelectorAll('.slot').forEach(s => { if (!s.classList.contains('mine') && !s.classList.contains('busy')) s.classList.remove('selected'); s.classList.add('free'); });
+  el.classList.remove('free');
+  el.classList.add('selected');
+  selectedSlot = hora;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = false;
+  btn.textContent = `Confirmar · ${formatDate(selectedDate)} · ${hora} h`;
+};
+
+window.confirmBooking = async function() {
+  if (!selectedPro || !selectedDate || !selectedSlot) return;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'Reservant...';
+  try {
+    await addDoc(collection(db, 'cites'), {
+      usuari_uid: currentUser.uid,
+      professional_id: selectedPro.id,
+      data: dateKey(selectedDate),
+      hora: selectedSlot,
+      durada_min: selectedPro.durada_min || 30,
+      estat: 'confirmada',
+      pagada: false,
+      cancel_lada_24h: false,
+      creat_a: serverTimestamp()
+    });
+    selectedSlot = null;
+    btn.textContent = 'Cita reservada!';
+    setTimeout(() => { goTo('home'); loadHome(); }, 1200);
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Error: ' + e.message;
+  }
+};
+
+// --- CANCEL ---
+window.openCancelModal = function(id, data, hora, isLate) {
+  cancelCiteId = id;
+  cancelCiteData = { data, hora, isLate };
+  const pro = professionals.find(p => p.id === userData?.professional_id);
+  document.getElementById('cancelModalBody').innerHTML = `Estàs a punt d'anul·lar la sessió del <strong>${formatDate(parseKey(data))} a les ${hora} h</strong>${pro ? ' amb ' + pro.nom : ''}.`;
+  document.getElementById('cancelWarn').style.display = isLate ? 'flex' : 'none';
+  document.getElementById('cancelModal').classList.add('show');
+};
+
+window.closeCancelModal = function() {
+  document.getElementById('cancelModal').classList.remove('show');
+  cancelCiteId = null;
+};
+
+window.confirmCancel = async function() {
+  if (!cancelCiteId) return;
+  try {
+    await updateDoc(doc(db, 'cites', cancelCiteId), {
+      estat: 'cancel·lada',
+      cancel_lada_24h: cancelCiteData.isLate,
+      cancel_lada_a: serverTimestamp()
+    });
+    if (!cancelCiteData.isLate) {
+      await addDoc(collection(db, 'slots_disponibles'), {
+        professional_id: userData?.professional_id || '',
+        data: cancelCiteData.data,
+        hora: cancelCiteData.hora,
+        visible: true,
+        creat_a: serverTimestamp()
+      });
+    }
+    closeCancelModal();
+    loadHome();
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
+// --- AVISOS ---
+window.toggleNotif = async function(key, el) {
+  el.classList.toggle('off');
+  const on = !el.classList.contains('off');
+  try {
+    const av = userData?.avisos || {};
+    av[key === 'slots' ? 'slots' : key === '24h' ? 'h24' : 'h2'] = on;
+    await updateDoc(doc(db, 'usuaris', currentUser.uid), { avisos: av });
+  } catch(e) {}
+};
+
+// --- NAV ---
+const headerTitles = {
+  home: () => [greeting(), userData?.nom || ''],
+  booking: () => ['Reservar cita', 'Tria professional, dia i hora'],
+  alerts: () => ['Avisos', 'Hores lliures i recordatoris'],
+  profile: () => ['El meu perfil', 'Informació i configuració']
+};
+
+window.goTo = function(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nitem').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  const [g, n] = headerTitles[name]();
+  document.getElementById('hGreeting').textContent = g;
+  document.getElementById('hName').textContent = n;
+  if (name === 'alerts') document.getElementById('alertBadge').style.display = 'none';
+};
+
+</script>
+</body>
+</html>
